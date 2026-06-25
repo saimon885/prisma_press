@@ -68,11 +68,18 @@ const loginUserDB = async (payload: LoginUser) => {
     email: user.email,
     name: user.name,
   };
-  const jwtAccesstoken = await jwt.sign(
+  const accessToken = await jwt.sign(
     jwtPayload,
     config.jwt_access_secret as string,
     {
       expiresIn: config.jwt_access_expire_in as any,
+    },
+  );
+  const refreshToken = await jwt.sign(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    {
+      expiresIn: config.jwt_refresh_expire_in as any,
     },
   );
 
@@ -80,7 +87,8 @@ const loginUserDB = async (payload: LoginUser) => {
 
   return {
     user: userWithoutPassword,
-    jwtAccesstoken,
+    accessToken,
+    refreshToken,
   };
 };
 

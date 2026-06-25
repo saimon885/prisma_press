@@ -17,6 +17,6 @@ app.use(cookieParser());
 
 app.use("/api", userRoutes);
 
-app.get("/", Auth(), async (req: Request, res: Response) => {
+app.get("/", async (req: Request, res: Response) => {
   res.send("Hello World!");
 });

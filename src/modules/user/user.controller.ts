@@ -1,39 +1,47 @@
-import { Request, Response } from "express";
+import { NextFunction, Request, Response } from "express";
 import httpstatus from "http-status";
 import { userServices } from "./user.service";
-const registerUser = async (req: Request, res: Response) => {
-  try {
-    const user = await userServices.registerUserDB(req.body);
-    res.status(httpstatus.CREATED).json({
-      success: true,
-      message: "User created successfully",
-      user,
-    });
-  } catch (error) {
-    res.status(httpstatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Failed to register user",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
+import { catchAsync } from "../../utils/catchAsync";
+import { sendResponse } from "../../utils/sendResponse";
 
-const loginUser = async (req: Request, res: Response) => {
-  try {
-    const user = await userServices.loginUserDB(req.body);
-    res.status(httpstatus.OK).json({
-      success: true,
-      message: "User logged in successfully",
+const registerUser = catchAsync(async (req: Request, res: Response) => {
+  const user = await userServices.registerUserDB(req.body);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpstatus.CREATED,
+    message: "User created successfully",
+    data: user,
+  });
+});
+
+const loginUser = catchAsync(async (req: Request, res: Response) => {
+  const { user, accessToken, refreshToken } = await userServices.loginUserDB(
+    req.body,
+  );
+  res.cookie("accessToken", accessToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24, // 1 day
+  });
+  res.cookie("refreshToken", refreshToken, {
+    httpOnly: true,
+    secure: false,
+    sameSite: "none",
+    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
+  });
+
+  sendResponse(res, {
+    success: true,
+    statusCode: httpstatus.OK,
+    message: "User logged in successfully",
+    data: {
       user,
-    });
-  } catch (error) {
-    res.status(httpstatus.INTERNAL_SERVER_ERROR).json({
-      success: false,
-      message: "Failed to login user",
-      error: error instanceof Error ? error.message : "Unknown error",
-    });
-  }
-};
+      accessToken,
+      refreshToken,
+    },
+  });
+});
 
 export const userController = {
   registerUser,
