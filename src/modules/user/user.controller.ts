@@ -14,36 +14,39 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const loginUser = catchAsync(async (req: Request, res: Response) => {
-  const { user, accessToken, refreshToken } = await userServices.loginUserDB(
-    req.body,
-  );
-  res.cookie("accessToken", accessToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24, // 1 day
-  });
-  res.cookie("refreshToken", refreshToken, {
-    httpOnly: true,
-    secure: false,
-    sameSite: "none",
-    maxAge: 1000 * 60 * 60 * 24 * 7, // 7 days
-  });
-
+const getProfile = catchAsync(async (req: Request, res: Response) => {
+  // const { accessToken } = req.cookies;
+  const user = req.user;
+  // console.log(accessToken);
+  // const veryfiedToken = jwtUtils.verifyToken(
+  //   accessToken,
+  //   config.jwt_access_secret as string,
+  // );
+  // if (typeof veryfiedToken === "string") {
+  //   throw new Error("Invalid token");
+  // }
+  const userProfile = await userServices.getUserProfileDB(user?.id);
   sendResponse(res, {
     success: true,
     statusCode: httpstatus.OK,
-    message: "User logged in successfully",
-    data: {
-      user,
-      accessToken,
-      refreshToken,
-    },
+    message: "Profile retrieved successfully",
+    data: userProfile,
+  });
+});
+
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  const id = req.user?.id;
+  const result = await userServices.updateProfileDB(req.body, id as string);
+  sendResponse(res, {
+    success: true,
+    statusCode: httpstatus.OK,
+    message: "User update successfully",
+    data: { result },
   });
 });
 
 export const userController = {
   registerUser,
-  loginUser,
+  getProfile,
+  updateProfile,
 };

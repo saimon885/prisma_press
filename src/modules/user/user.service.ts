@@ -1,8 +1,7 @@
 import config from "../../config";
 import { prisma } from "../../lib/prisma";
 import bcrypt from "bcrypt";
-import jwt from "jsonwebtoken";
-import { CreateUser, LoginUser } from "./user.interface";
+import { CreateUser, IupdatePrfile } from "./user.interface";
 
 const registerUserDB = async (payload: CreateUser) => {
   const { name, email, password, profilePhoto } = payload;
@@ -49,50 +48,42 @@ const registerUserDB = async (payload: CreateUser) => {
   });
   return user;
 };
-const loginUserDB = async (payload: LoginUser) => {
-  const { email, password } = payload;
+const getUserProfileDB = async (userId: string) => {
   const user = await prisma.user.findUnique({
-    where: {
-      email,
+    where: { id: userId },
+    omit: {
+      password: true,
+    },
+    include: {
+      profile: true,
     },
   });
-  if (!user) {
-    throw new Error("User not found");
-  }
-  const isMatched = await bcrypt.compare(password, user.password);
-  if (!isMatched) {
-    throw new Error("Invalid credentials");
-  }
-  const jwtPayload = {
-    id: user.id,
-    email: user.email,
-    name: user.name,
-  };
-  const accessToken = await jwt.sign(
-    jwtPayload,
-    config.jwt_access_secret as string,
-    {
-      expiresIn: config.jwt_access_expire_in as any,
-    },
-  );
-  const refreshToken = await jwt.sign(
-    jwtPayload,
-    config.jwt_refresh_secret as string,
-    {
-      expiresIn: config.jwt_refresh_expire_in as any,
-    },
-  );
 
-  const { password: _, ...userWithoutPassword } = user;
-
-  return {
-    user: userWithoutPassword,
-    accessToken,
-    refreshToken,
-  };
+  return user;
+};
+const updateProfileDB = async (payload: IupdatePrfile, userId: string) => {
+  const { profilePhoto, bio } = payload;
+  const result = await prisma.profile.update({
+    data: {
+      profilePhoto,
+      bio,
+    },
+    include: {
+      user: {
+        omit: {
+          password: true,
+        },
+      },
+    },
+    where: {
+      userId,
+    },
+  });
+  return result;
 };
 
 export const userServices = {
   registerUserDB,
-  loginUserDB,
+  getUserProfileDB,
+  updateProfileDB,
 };

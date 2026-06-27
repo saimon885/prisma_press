@@ -4,7 +4,8 @@ export interface CreateUser {
   password: string;
   profilePhoto?: string;
 }
-export interface LoginUser {
-  email: string;
-  password: string;
+
+export interface IupdatePrfile {
+  profilePhoto?: string;
+  bio?: string;
 }

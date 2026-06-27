@@ -8,3 +8,19 @@ enum Role {
     AUTHOR
     ADMIN
 }
+
+enum Cstatus {
+    APPROVED
+    REJECT
+}
+
+enum Featured {
+    true
+    false
+}
+
+enum postStatus {
+    Draft
+    published
+    Archived
+}
