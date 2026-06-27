@@ -9,6 +9,7 @@ import { sendResponse } from "../utils/sendResponse";
 export const Auth = (...requireRoles: Role[]) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
+     
       const token = req.cookies.accessToken
         ? req.cookies.accessToken
         : req.headers.authorization?.startsWith("Bearer")
