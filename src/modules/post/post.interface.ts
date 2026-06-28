@@ -8,3 +8,12 @@ export interface IPostCreate {
   isFeatured?: boolean;
   status?: postStatus;
 }
+
+export interface IpostUpdate {
+  title?: string;
+  content?: string;
+  tumbnail?: string;
+  tags?: string[];
+  isFeatured?: boolean;
+  status?: postStatus;
+}

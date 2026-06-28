@@ -9,7 +9,7 @@ router.post(
   Auth(Role.ADMIN, Role.USER, Role.AUTHOR),
   commentController.createComment,
 );
-router.get("/author/:authorId", commentController.getAuthorComment);
+router.get("/author", Auth(), commentController.getAuthorComment);
 router.get("/:commentId", commentController.getSingleComment);
 router.patch(
   "/:commentId",
@@ -22,7 +22,7 @@ router.delete(
   commentController.deleteComment,
 );
 router.patch(
-  "/:commentId",
+  "/admin/:commentId",
   Auth(Role.ADMIN),
   commentController.updateModarateComment,
 );

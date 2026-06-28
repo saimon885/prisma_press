@@ -51,10 +51,53 @@ const getSinglePost = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 });
-const getPostStates = catchAsync((req: Request, res: Response) => {});
 
-const updatePost = catchAsync((req: Request, res: Response) => {});
-const deletePost = catchAsync((req: Request, res: Response) => {});
+const updatePost = catchAsync(async (req: Request, res: Response) => {
+  const authorId = req.user.id;
+  const postId = req.params.postId;
+  const isAdmin = req.user.role === "ADMIN";
+  const payload = req.body;
+  const result = await postService.updatePostDB(
+    authorId,
+    payload,
+    isAdmin,
+    postId as string,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "post retrive successfull.",
+    data: result,
+  });
+});
+const deletePost = catchAsync(async (req: Request, res: Response) => {
+  const authorId = req.user.id;
+  const postId = req.params.postId;
+  if (!postId) {
+    throw new Error("please added the postId!");
+  }
+  const isAdmin = req.user.role === "ADMIN";
+  const result = await postService.deletePostDB(
+    postId as string,
+    authorId,
+    isAdmin,
+  );
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "post delete successfull.",
+    data: null,
+  });
+});
+const getPostStates = catchAsync(async (req: Request, res: Response) => {
+  const result = await postService.getPostStatesDB();
+  sendResponse(res, {
+    success: true,
+    statusCode: httpStatus.OK,
+    message: "all States retrive successfull",
+    data: result,
+  });
+});
 
 export const postController = {
   createPost,
